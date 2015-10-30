@@ -10,7 +10,6 @@ This script was not created by the creators of pandoc. We created it to fill our
 INSTRUCTIONS
 This AppleScript droplet is designed to make and run a shell script that uses pandoc (the "swiss-army knife" for document conversion) to convert one or more files whose icons are dragged onto the droplet icon in the OS X Finder. The script converts multiple input files recursively, instead of concatenating multiple input files as pandoc does when run from the command line. We find this droplet to be much less tedious to use than the command line. To save the script as a droplet, open the script in Script Editor and save the script with file format: Application.
 
-
 IMPORTANT REQUIREMENTS
 Before trying to convert files, make sure that all input files are the same format, such as all markdown files or all html files. This script is designed to convert files of the same format. The script does not check the format of the input files, so it relies on you to accurately specify the format. The droplet only accepts files, not folders; folders are ignored.
 Make sure that the character encoding of all input files is UTF-8. If you're not sure of the character encoding, in Terminal.app you can check the character encoding of a file by entering the command: file -I [filename]
