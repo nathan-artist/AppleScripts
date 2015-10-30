@@ -181,7 +181,7 @@ on open dropped_files
 					if output_format is "epub" then
 						set output_extension to ".epub"
 					end if
-					if output_format is "epub" then
+					if output_format is "epub3" then
 						set output_extension to "-epub3.epub"
 					end if
 					if output_format is "fb2" then
