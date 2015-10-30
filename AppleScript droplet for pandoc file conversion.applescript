@@ -1,6 +1,6 @@
 property script_title : "AppleScript droplet for pandoc file conversion"
-property script_version : "1.0"
-property pandoc_version : "1.12.4.2"
+property script_version : "1.1"
+property pandoc_version : "1.15.1"
 
 (*
 DISCLAIMER
@@ -10,16 +10,17 @@ This script was not created by the creators of pandoc. We created it to fill our
 INSTRUCTIONS
 This AppleScript droplet is designed to make and run a shell script that uses pandoc (the "swiss-army knife" for document conversion) to convert one or more files whose icons are dragged onto the droplet icon in the OS X Finder. The script converts multiple input files recursively, instead of concatenating multiple input files as pandoc does when run from the command line. We find this droplet to be much less tedious to use than the command line. To save the script as a droplet, open the script in Script Editor and save the script with file format: Application.
 
+
 IMPORTANT REQUIREMENTS
 Before trying to convert files, make sure that all input files are the same format, such as all markdown files or all html files. This script is designed to convert files of the same format. The script does not check the format of the input files, so it relies on you to accurately specify the format. The droplet only accepts files, not folders; folders are ignored.
 Make sure that the character encoding of all input files is UTF-8. If you're not sure of the character encoding, in Terminal.app you can check the character encoding of a file by entering the command: file -I [filename]
 Make sure that all input files have filename extensions (for example: .html, .rtf). It is OK if the extensions are hidden in the Finder; just make sure that each file has a filename extension, hidden or not. Make sure that there are no periods (except for the period before the extension) in the filenames of the input files. Make sure that there are no quotation marks (or other forbidden characters that would make the shell script fail) in the filenames.
-This script was written for pandoc 1.12.4.2, so if you are using a newer or older version of pandoc you will want to change the list of input formats and output formats in the script to reflect the formats supported by your version of pandoc, and you will want to make sure that the syntax after "do shell script" is correct for your version of pandoc.
+This script was written for pandoc 1.15.1, so if you are using a newer or older version of pandoc you will want to change the list of input formats and output formats in the script to reflect the formats supported by your version of pandoc, and you will want to make sure that the syntax after "do shell script" is correct for your version of pandoc.
 Before running the script you must install pandoc either directly from http://pandoc.org or using (our preferred method) a package manager such as Fink, Homebrew, or MacPorts.
 Before running the script, change the property pandoc_path below to reflect the path of the pandoc command on your computer. In Terminal.app you can check the path of the pandoc command by entering the command: type -a pandoc
 *)
 
-property pandoc_path : "/opt/local/bin/pandoc"
+property pandoc_path : "/usr/local/bin/pandoc"
 
 -- When the script is run without dragging files onto the droplet:
 on run
@@ -32,13 +33,13 @@ on open dropped_files
 	set userCanceled to true
 	try
 		-- Display a dialog box with a list of input formats and specify one. You can change the default item if you prefer a different one.
-		set inputFormats to {"native", "json", "markdown", "markdown_strict", "markdown_phpextra", "markdown_github", "textile", "rst", "html", "docbook", "opml", "org", "mediawiki", "haddock", "latex"}
+		set inputFormats to {"native", "json", "markdown", "markdown_strict", "markdown_phpextra", "markdown_github", "markdown_mmd", "commonmark", "textile", "rst", "html", "docbook", "opml", "t2t", "docx", "odt", "epub", "opml", "org", "mediawiki", "twiki", "haddock", "latex"}
 		set inputDialogResult to {choose from list inputFormats with title "Pandoc: Specify input format" with prompt "What is the format of the file(s) to be converted?" default items "html"}
 		set input_format to inputDialogResult as string
 		-- Exit if cancel
 		if input_format is in inputFormats then
 			-- Display a dialog box with a list of output formats and specify one or more. You can change the default item if you prefer a different one.
-			set outputFormats to {"native", "json", "markdown", "markdown_strict", "markdown_phpextra", "markdown_github", "rst", "html", "html5", "latex", "beamer", "context", "man", "mediawiki", "textile", "org", "texinfo", "opml", "docbook", "opendocument", "odt", "docx", "rtf", "epub", "epub3", "fb2", "asciidoc", "icml", "slidy", "slideous", "dzslides", "revealjs", "s5"}
+			set outputFormats to {"native", "json", "markdown", "markdown_strict", "markdown_phpextra", "markdown_github", "markdown_mmd", "commonmark", "rst", "html", "html5", "latex", "beamer", "context", "man", "mediawiki", "dokuwiki", "textile", "org", "texinfo", "opml", "docbook", "opendocument", "odt", "docx", "haddock", "rtf", "epub", "epub3", "fb2", "asciidoc", "icml", "slidy", "slideous", "dzslides", "revealjs", "s5"}
 			set outputDialogResult to {choose from list outputFormats with title "Pandoc: Specify output format(s)" with prompt "Input format is " & input_format & ". What output format(s) do you want?" default items "docx" with multiple selections allowed}
 			set {text_delimiters, my text item delimiters} to {my text item delimiters, space}
 			set output_format_words to words of (outputDialogResult as text)
@@ -47,7 +48,7 @@ on open dropped_files
 				set {text_delimiters, my text item delimiters} to {my text item delimiters, ", "}
 				set output_format_list to outputDialogResult as text
 				-- Display a dialog box with specified input and output formats, so you can cancel if you made any mistakes and specify more command-line options via a text field. You can change the default answer if you prefer a different one.
-				set optionsDialogResult to display dialog "Input format: " & input_format & return & return & "Output format(s): " & output_format_list & return & return & "If you would like to add more command-line options, add them in the field below, for example: --standalone --no-wrap --columns=NUMBER --toc --toc-depth=NUMBER --no-highlight --highlight-style=STYLE --parse-raw --smart --normalize --preserve-tabs --tab-stop=NUMBER --ascii --reference-links --chapters --number-sections --no-tex-ligatures" buttons {"Cancel", "OK"} default button "OK" cancel button "Cancel" default answer "--standalone" with title "Pandoc: Specify other options"
+				set optionsDialogResult to display dialog "Input format: " & input_format & return & return & "Output format(s): " & output_format_list & return & return & "If you would like to add more command-line options, add them in the field below, for example:" & return & return & "Some reader options:" & return & "--parse-raw --smart --old-dashes --base-header-level=NUMBER --indented-code-classes=CLASSES --default-image-extension=EXTENSION --metadata=KEY[:VAL] --normalize --preserve-tabs --tab-stop=NUMBER --track-changes=accept|reject|all --extract-media=DIR" & return & return & "Some writer options:" & return & "--data-dir=DIRECTORY --standalone --no-wrap --columns=NUMBER --toc --toc-depth=NUMBER --no-highlight --highlight-style=STYLE" & return & return & "Some options affecting specific writers:" & return & "--ascii --reference-links --chapters --number-sections --number-offset=NUMBER[,NUMBER,...] --no-tex-ligatures --listings --incremental --slide-level=NUMBER --section-divs --email-obfuscation=none|javascript|references --id-prefix=STRING --css=URL --latex-engine=pdflatex|lualatex|xelatex --latex-engine-opt=STRING --bibliography=FILE" buttons {"Cancel", "OK"} default button "OK" cancel button "Cancel" default answer "--standalone" with title "Pandoc: Specify other options"
 				-- Exit if cancel
 				if button returned of optionsDialogResult is "OK" then
 					set more_options to text returned of optionsDialogResult
@@ -76,6 +77,9 @@ on open dropped_files
 					if output_format is "native" then
 						set output_extension to ".hs"
 					end if
+					if output_format is "haddock" then
+						set output_extension to "-haddock.hs"
+					end if
 					if output_format is "json" then
 						set output_extension to ".json"
 					end if
@@ -85,6 +89,9 @@ on open dropped_files
 					if output_format is "mediawiki" then
 						set output_extension to "-mediawiki.txt"
 					end if
+					if output_format is "dokuwiki" then
+						set output_extension to "-dokuwiki.txt"
+					end if
 					if output_format is "asciidoc" then
 						set output_extension to "-asciidoc.txt"
 					end if
@@ -92,13 +99,19 @@ on open dropped_files
 						set output_extension to ".md"
 					end if
 					if output_format is "markdown_strict" then
-						set output_extension to "-markdown_strict.md"
+						set output_extension to "-strict.md"
 					end if
 					if output_format is "markdown_phpextra" then
-						set output_extension to "-markdown_phpextra.md"
+						set output_extension to "-phpextra.md"
 					end if
 					if output_format is "markdown_github" then
-						set output_extension to "-markdown_github.md"
+						set output_extension to "-github.md"
+					end if
+					if output_format is "markdown_mmd" then
+						set output_extension to "-mmd.md"
+					end if
+					if output_format is "commonmark" then
+						set output_extension to "-commonmark.md"
 					end if
 					if output_format is "rst" then
 						set output_extension to ".rst"
