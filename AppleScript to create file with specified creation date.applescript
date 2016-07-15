@@ -139,7 +139,7 @@ on run
 				set date_parsed to (date_parsed & "." & (text 17 thru 18 of date_unparsed)) -- ss
 			end if
 			set output_file_path to (save_path & date_parsed & ".html")
-			set shell_script to "touch -t " & date_parsed & space & quoted form of output_file_path & " ; setFile -a E " & quoted form of output_file_path & " ; Rez -a -o " & quoted form of output_file_path & space & set_to_open_file_with_textedit & " ; open -e " & quoted form of output_file_path
+			set shell_script to "touch -t " & date_parsed & space & quoted form of output_file_path & " ; setFile -a E " & quoted form of output_file_path & " ; Rez -a -o " & quoted form of output_file_path & space & set_to_open_file_with_textedit & "open -e " & quoted form of output_file_path
 			-- create a new empty file, hide its file extension, set the file to open always with TextEdit, and then open the file in TextEdit
 			do shell script shell_script
 		end if
