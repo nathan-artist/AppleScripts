@@ -123,9 +123,6 @@ on run
 				set date_parsed to (date_parsed & date_hour) -- hh
 				set date_parsed to (date_parsed & (text 15 thru 16 of date_unparsed)) -- mm
 				set date_parsed to (date_parsed & "." & (text 18 thru 19 of date_unparsed)) -- ss
-				set output_file_path to (save_path & date_parsed & ".html")
-				set shell_script to "touch -t " & date_parsed & " '" & output_file_path & "' ; open -e " & quoted form of output_file_path
-				do shell script shell_script
 			else if the length of date_unparsed is 18 then
 				-- parse single-digit hour h
 				set date_hour to (text 12 of date_unparsed)
