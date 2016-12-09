@@ -1,10 +1,13 @@
--- This script shows a dialog box that asks for a date and then (1) uses the shell command "touch" (see "man touch" for details) to create an empty html file in save_path with that creation date, then (2) sets the file extension of the file to hidden, then (3) changes the file metadata so that it always opens with TextEdit, and then (4) opens the file in TextEdit. Apple's Developer Tools must be installed before using this script so that the Rez and SetFile commands are available. The date input format is the format provided by the "Insert Short Date & Time" command in the free OS X service WordService, which can be downloaded from DEVONtechnologies at http://www.devontechnologies.com/products/freeware.html (of course this script could also be modified to handle any other date format).
+-- This script shows a dialog box that asks for a date and then (1) uses the shell command "touch" (see "man touch" for details) to create an empty html file in save_path with that creation date, then (2) sets the file extension of the file to hidden, then (3) changes the file metadata so that it always opens with TextEdit, and then (4) opens the file in TextEdit. Apple's Developer Tools must be installed before using this script so that the Rez and SetFile commands are available. The date input format is the format provided by the "Insert Short Date & Time" command in the free OS X service WordService, which can be downloaded from DEVONtechnologies at http://www.devontechnologies.com/products/freeware.html (of course this script could also be modified to handle any other date format). Check the following properties below and make sure they are correct before running the script: property save_path and property resource_fork_path.
 
--- where the new file will be saved:
+-- path where the new file will be saved:
 property save_path : "/Volumes/Shared Drive/Nathan/Journal/Uncategorized/"
 
+-- file containing the resource fork to be appended to the new file; this UNIX file must be manually created before running this script, and should contain the content of the property resource_fork (see below) between the EOF delimiters
+property resource_fork_path : "/Users/quadcore/.TextEdit.r"
+
 -- resource fork to be appended to the new file; for more info see: https://superuser.com/questions/259248/mac-osx-change-file-association-per-file-on-the-command-line
-property set_to_open_file_with_textedit : "<<EOF
+property resource_fork : "<<EOF
 data 'usro' (0) {
 	$\"0000 001B 2F41 7070 6C69 6361 7469 6F6E\"            /* ..../Application */
 	$\"732F 5465 7874 4564 6974 2E61 7070 0000\"            /* s/TextEdit.app.. */
@@ -136,7 +139,7 @@ on run
 				set date_parsed to (date_parsed & "." & (text 17 thru 18 of date_unparsed)) -- ss
 			end if
 			set output_file_path to (save_path & date_parsed & ".html")
-			set shell_script to "touch -t " & date_parsed & space & quoted form of output_file_path & " ; setFile -a E " & quoted form of output_file_path & " ; Rez -a -o " & quoted form of output_file_path & space & set_to_open_file_with_textedit & "open -e " & quoted form of output_file_path
+			set shell_script to "touch -t " & date_parsed & space & quoted form of output_file_path & " ; setFile -a E " & quoted form of output_file_path & " ; Rez " & quoted form of resource_fork_path & " -a -o " & quoted form of output_file_path & " ; open -e " & quoted form of output_file_path
 			-- create a new empty file, hide its file extension, set the file to open always with TextEdit, and then open the file in TextEdit
 			do shell script shell_script
 		end if
