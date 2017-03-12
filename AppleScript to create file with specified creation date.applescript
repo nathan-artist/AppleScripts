@@ -1,4 +1,4 @@
--- This script shows a dialog box that asks for a date and then (1) uses the shell command "touch" (see "man touch" for details) to create an empty html file in save_path with that creation date, then (2) sets the file extension of the file to hidden, then (3) changes the file metadata so that it always opens with TextEdit, and then (4) opens the file in TextEdit. Apple's Developer Tools must be installed before using this script so that the Rez and SetFile commands are available. The date input format is the format provided by the "Insert Short Date & Time" command in the free OS X service WordService, which can be downloaded from DEVONtechnologies at http://www.devontechnologies.com/products/freeware.html (of course this script could also be modified to handle any other date format). Check the following properties below and make sure they are correct before running the script: property save_path and property resource_fork_path.
+-- This script shows a dialog box that asks for a date and then (1) uses the shell command "touch" (see "man touch" for details) to create an empty html file in save_path with that creation date, then (2) sets the file extension of the file to hidden, then (3) changes the file metadata so that it always opens with TextEdit, then (4) opens the file in TextEdit, and then (5) inserts the creation date into the document body. Apple's Developer Tools must be installed before using this script so that the Rez and SetFile commands are available. The date input format is the format provided by the "Insert Short Date & Time" command in the free OS X service WordService, which can be downloaded from DEVONtechnologies at http://www.devontechnologies.com/products/freeware.html (of course this script could also be modified to handle any other date format). Check the following properties below and make sure they are correct before running the script: property save_path and property resource_fork_path.
 
 -- path where the new file will be saved:
 property save_path : "/Volumes/Shared Drive/Nathan/Journal/Uncategorized/"
@@ -84,10 +84,10 @@ on run
 		set the_date to display dialog "Enter date in format YYYY/MM/DD[,] [h]h:mm:ss [AM/PM]" buttons {"Cancel", "OK"} default button "OK" cancel button "Cancel" default answer "" with title "Create File with Specified Creation Date"
 		-- exit if cancel
 		if the button returned of the_date is "OK" then
-			set date_unparsed to text returned of the_date
-			if "," is in date_unparsed then
+			set date_original to text returned of the_date
+			if "," is in date_original then
 				-- remove commas from input
-				set date_unparsed to replaceText(date_unparsed, ",", "")
+				set date_unparsed to replaceText(date_original, ",", "")
 			end if
 			if text -1 of date_unparsed is in {":", " "} then
 				-- trim colon or space from end of input date
@@ -142,6 +142,16 @@ on run
 			set shell_script to "touch -t " & date_parsed & space & quoted form of output_file_path & " ; setFile -a E " & quoted form of output_file_path & " ; Rez " & quoted form of resource_fork_path & " -a -o " & quoted form of output_file_path & " ; open -e " & quoted form of output_file_path
 			-- create a new empty file, hide its file extension, set the file to open always with TextEdit, and then open the file in TextEdit
 			do shell script shell_script
+			-- insert input date into the file
+			repeat until application "TextEdit" is running
+				delay 0.2
+			end repeat
+			tell application "TextEdit"
+				repeat until document (date_parsed as string) exists
+					delay 0.2
+				end repeat
+				tell document (date_parsed as string) to set its text to date_original as string
+			end tell
 		end if
 	end try
 end run
