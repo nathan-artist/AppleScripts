@@ -151,6 +151,12 @@ on run
 					delay 0.2
 				end repeat
 				tell document (date_parsed as string) to set its text to date_original as string
+				set font of text of document (date_parsed as string) to "Arial"
+				activate
+			end tell
+			tell application "System Events" to tell process "TextEdit" -- workaround for strange font behavior in TextEdit: without this code, the font at the insertion point is TextEdit's default font
+				key code 123 -- left arrow
+				key code 124 -- right arrow
 			end tell
 		end if
 	end try
