@@ -81,13 +81,16 @@ EOF
 
 on run
 	try
-		set the_date to display dialog "Enter date in format YYYY/MM/DD[,] [h]h:mm:ss [AM/PM]" buttons {"Cancel", "OK"} default button "OK" cancel button "Cancel" default answer "" with title "Create File with Specified Creation Date"
+		set current_date to (do shell script "date \"+%Y/%m/%d, %H:%M:%S %p\"")
+		set the_date to display dialog "Enter date in format YYYY/MM/DD[,] [h]h:mm:ss [AM/PM]" buttons {"Cancel", "OK"} default button "OK" cancel button "Cancel" default answer (current_date as string) with title "Create File with Specified Creation Date"
 		-- exit if cancel
 		if the button returned of the_date is "OK" then
 			set date_original to text returned of the_date
 			if "," is in date_original then
 				-- remove commas from input
 				set date_unparsed to replaceText(date_original, ",", "")
+			else
+				set date_unparsed to date_original
 			end if
 			if text -1 of date_unparsed is in {":", " "} then
 				-- trim colon or space from end of input date
@@ -107,6 +110,8 @@ on run
 				repeat until text -1 of date_unparsed is not in {"A", "M", "P", " "}
 					set date_unparsed to trimLastChar(date_unparsed)
 				end repeat
+			else
+				set afternoon to "unset"
 			end if
 			set date_parsed to text 1 thru 4 of date_unparsed -- YYYY
 			set date_parsed to (date_parsed & (text 6 thru 7 of date_unparsed)) -- MM
