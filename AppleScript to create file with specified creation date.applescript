@@ -9,7 +9,10 @@ property resource_fork_path : "/Users/quadcore/.TextEdit.r"
 on run
 	try
 		set current_date to (do shell script "date \"+%Y/%m/%d, %H:%M:%S %p\"")
-		set the_date to display dialog "Enter date in format YYYY/MM/DD[,] [h]h:mm:ss [AM/PM]" buttons {"Cancel", "OK"} default button "OK" cancel button "Cancel" default answer (current_date as string) with title "Create File with Specified Creation Date"
+		tell application "System Events"
+			activate
+			set the_date to display dialog "Enter date in format YYYY/MM/DD[,] [h]h:mm:ss [AM/PM]" buttons {"Cancel", "OK"} default button "OK" cancel button "Cancel" default answer (current_date as string) with title "Create File with Specified Creation Date"
+		end tell
 		-- exit if cancel
 		if the button returned of the_date is "OK" then
 			set date_original to text returned of the_date
