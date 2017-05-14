@@ -8,6 +8,11 @@ property resource_fork_path : "/Users/quadcore/.TextEdit.r"
 
 on run
 	try
+		-- get the name of the active application so that we can go back to it if user cancels
+		tell application "System Events"
+			set active_app to name of first application process whose frontmost is true
+		end tell
+		-- use unix "date" command to get the current date & time; put it in dialog box
 		set current_date to (do shell script "date \"+%Y/%m/%d, %H:%M:%S %p\"")
 		tell application "System Events"
 			activate
@@ -94,6 +99,10 @@ on run
 				key code 124 -- right arrow
 			end tell
 		end if
+	on error
+		tell application active_app
+			activate
+		end tell
 	end try
 end run
 
