@@ -40,44 +40,46 @@ https://apple.stackexchange.com/q/308475
 *)
 
 on open location this_URL
-	set the query_text to (text 11 thru -1 of this_URL)
-	if (text 1 thru 11 of the query_text) is "searchpath:" then
-		set x to the offset of "&" in the query_text
-		set the search_path to (text 12 thru (x - 1) of the query_text)
-		set the search_path to decodeText(search_path)
-		set the query_text to (text from (x + 1) to -1 of the query_text)
-		set no_search_path to false
-	else
-		set no_search_path to true
-	end if
-	set the query_text to decodeText(query_text)
-	tell application "Finder"
-		activate
-		try
-			if no_search_path then
+	if (text 1 thru 10 of this_URL) is "spotlight:" then
+		set the query_text to (text 11 thru -1 of this_URL)
+		if (text 1 thru 11 of the query_text) is "searchpath:" then
+			set x to the offset of "&" in the query_text
+			set the search_path to (text 12 thru (x - 1) of the query_text)
+			set the search_path to decodeText(search_path)
+			set the query_text to (text from (x + 1) to -1 of the query_text)
+			set no_search_path to false
+		else
+			set no_search_path to true
+		end if
+		set the query_text to decodeText(query_text)
+		tell application "Finder"
+			activate
+			try
+				if no_search_path then
+					open computer container
+					repeat until (target of front Finder window) is computer container
+						delay 0.5
+					end repeat
+				else
+					open ((POSIX file search_path) as alias)
+					repeat until ((the target of front Finder window as alias) as text) is (((the POSIX file search_path) as alias) as text)
+						delay 0.5
+					end repeat
+				end if
+			on error
 				open computer container
 				repeat until (target of front Finder window) is computer container
 					delay 0.5
 				end repeat
-			else
-				open ((POSIX file search_path) as alias)
-				repeat until ((the target of front Finder window as alias) as text) is (((the POSIX file search_path) as alias) as text)
-					delay 0.5
-				end repeat
-			end if
-		on error
-			open computer container
-			repeat until (target of front Finder window) is computer container
-				delay 0.5
-			end repeat
-		end try
-	end tell
-	tell application "System Events"
-		keystroke "f" using command down
-		keystroke query_text
-		delay 1.5
-		key code 53 -- esc key to dispel drop-down menu
-	end tell
+			end try
+		end tell
+		tell application "System Events"
+			keystroke "f" using command down
+			keystroke query_text
+			delay 1.5
+			key code 53 -- esc key to dispel drop-down menu
+		end tell
+	end if
 end open location
 
 on decodeChars(these_chars)
