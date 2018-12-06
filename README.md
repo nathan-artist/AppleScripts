@@ -10,6 +10,9 @@ This script provides a graphical front end for [Pandoc](https://pandoc.org). Jus
 ## AppleScript droplet to create symbolic link
 This script asks for a destination folder and creates symbolic links in that folder to whatever you drop onto it. Just [save it as an AppleScript droplet](https://developer.apple.com/library/content/documentation/LanguagesUtilities/Conceptual/MacAutomationScriptingGuide/SaveaScript.html), and then drop files or folders onto it that you want to link. The script ignores .webloc files since AppleScript treats those as URLs instead of as files.
 
+## AppleScript droplet to map the GPS position of an image in Apple Maps
+This script uses [ExifTool](https://en.wikipedia.org/wiki/ExifTool) by Phil Harvey (a free and open-source command-line application) to extract the GPS position from an image's EXIF data and then displays that position in Apple Maps. Just [save it as an AppleScript droplet](https://developer.apple.com/library/content/documentation/LanguagesUtilities/Conceptual/MacAutomationScriptingGuide/SaveaScript.html), and then run the app by dragging an image file onto the app or else by clicking on it and choosing an image file, and if the image has a GPS position in its EXIF data then Maps.app will open with that position as a dropped pin. Read the comments in the script before running it.
+
 ## AppleScript for Scrivener to sync with external folder and compile
 This script for [Scrivener 2](https://www.literatureandlatte.com/scrivener) runs the menu commands "Sync with External Folder Now" and "Compile..." so that both can be done with one command. It presumes that "Sync with External Folder" has already been run at least once to set the necessary sync settings. Since the script uses [GUI scripting](http://www.macosautomation.com/mavericks/guiscripting/), the Accessibility API must be enabled in OS X 10.8 Mountain Lion and earlier, or it must be specifically enabled for Scrivener in OS X 10.9 Mavericks and later.
 
