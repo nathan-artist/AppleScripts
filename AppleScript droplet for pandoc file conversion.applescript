@@ -1,6 +1,6 @@
 property script_title : "AppleScript droplet for pandoc file conversion"
-property script_version : "1.1"
-property pandoc_version : "1.15.1"
+property script_version : "2.0"
+property pandoc_version : "2.7.2"
 
 (*
 DISCLAIMER
@@ -15,11 +15,11 @@ Before trying to convert files, make sure that all input files are the same form
 Make sure that the character encoding of all input files is UTF-8. If you're not sure of the character encoding, in Terminal.app you can check the character encoding of a file by entering the command: file -I [filename]
 Make sure that all input files have filename extensions (for example: .html, .rtf). It is OK if the extensions are hidden in the Finder; just make sure that each file has a filename extension, hidden or not. Make sure that there are no periods (except for the period before the extension) in the filenames of the input files. Make sure that there are no quotation marks (or other forbidden characters that would make the shell script fail) in the filenames.
 This script was written for pandoc 1.15.1, so if you are using a newer or older version of pandoc you will want to change the list of input formats and output formats in the script to reflect the formats supported by your version of pandoc, and you will want to make sure that the syntax after "do shell script" is correct for your version of pandoc.
-Before running the script you must install pandoc either directly from http://pandoc.org or using (our preferred method) a package manager such as Fink, Homebrew, or MacPorts.
+Before running the script you must install pandoc either directly from http://pandoc.org or using a package manager such as Fink, Homebrew, or MacPorts.
 Before running the script, change the property pandoc_path below to reflect the path of the pandoc command on your computer. In Terminal.app you can check the path of the pandoc command by entering the command: type -a pandoc
 *)
 
-property pandoc_path : "/usr/local/bin/pandoc"
+property pandoc_path : "/usr/local/bin" -- The folder containing pandoc & pandoc-citeproc
 
 -- When the script is run without dragging files onto the droplet:
 on run
@@ -32,14 +32,14 @@ on open dropped_files
 	set userCanceled to true
 	try
 		-- Display a dialog box with a list of input formats and specify one. You can change the default item if you prefer a different one.
-		set inputFormats to {"native", "json", "markdown", "markdown_strict", "markdown_phpextra", "markdown_github", "markdown_mmd", "commonmark", "textile", "rst", "html", "docbook", "t2t", "docx", "odt", "epub", "opml", "org", "mediawiki", "twiki", "haddock", "latex"}
-		set inputDialogResult to {choose from list inputFormats with title "Pandoc: Specify input format" with prompt "What is the format of the file(s) to be converted?" default items "html"}
+		set inputFormats to {"commonmark", "creole", "docbook", "docuwiki", "docx", "epub", "fb2", "gfm", "haddock", "html", "ipynb", "jats", "json", "latex", "man", "markdown", "markdown_github", "markdown_mmd", "markdown_phpextra", "markdown_strict", "mediawiki", "muse", "native", "odt", "opml", "org", "rst", "t2t", "textile", "tikiwiki", "twiki", "vimwiki"}
+		set inputDialogResult to {choose from list inputFormats with title "Pandoc: Specify input format" with prompt "What is the format of the file(s) to be converted? (Note that markdown_github is deprecated in favor of gfm for GitHub-Flavored Markdown.)" default items "html"}
 		set input_format to inputDialogResult as string
 		-- Exit if cancel
 		if input_format is in inputFormats then
 			-- Display a dialog box with a list of output formats and specify one or more. You can change the default item if you prefer a different one.
-			set outputFormats to {"native", "json", "markdown", "markdown_strict", "markdown_phpextra", "markdown_github", "markdown_mmd", "commonmark", "rst", "html", "html5", "latex", "beamer", "context", "man", "mediawiki", "dokuwiki", "textile", "org", "texinfo", "opml", "docbook", "opendocument", "odt", "docx", "haddock", "rtf", "epub", "epub3", "fb2", "asciidoc", "icml", "slidy", "slideous", "dzslides", "revealjs", "s5"}
-			set outputDialogResult to {choose from list outputFormats with title "Pandoc: Specify output format(s)" with prompt "Input format is " & input_format & ". What output format(s) do you want?" default items "docx" with multiple selections allowed}
+			set outputFormats to {"asciidoc", "beamer", "commonmark", "context", "docbook4", "docbook5", "docx", "dokuwiki", "dzslides", "epub2", "epub3", "fb2", "gfm", "haddock", "html", "html5", "icml", "json", "latex", "man", "markdown", "markdown_github", "markdown_mmd", "markdown_phpextra", "markdown_strict", "mediawiki", "ms", "muse", "native", "odt", "opendocument", "opml", "org", "plain", "pptx", "revealjs", "rst", "rtf", "s5", "slideous", "slidy", "tei", "texinfo", "textile", "xwiki", "zimwiki"}
+			set outputDialogResult to {choose from list outputFormats with title "Pandoc: Specify output format(s)" with prompt "Input format is " & input_format & ". What output format(s) do you want? (Note that markdown_github is deprecated in favor of gfm for GitHub-Flavored Markdown.)" default items "docx" with multiple selections allowed}
 			set {text_delimiters, my text item delimiters} to {my text item delimiters, space}
 			set output_format_words to words of (outputDialogResult as text)
 			-- Exit if cancel
@@ -47,7 +47,7 @@ on open dropped_files
 				set {text_delimiters, my text item delimiters} to {my text item delimiters, ", "}
 				set output_format_list to outputDialogResult as text
 				-- Display a dialog box with specified input and output formats, so you can cancel if you made any mistakes and specify more command-line options via a text field. You can change the default answer if you prefer a different one.
-				set optionsDialogResult to display dialog "Input format: " & input_format & return & return & "Output format(s): " & output_format_list & return & return & "If you would like to add more command-line options, add them in the field below, for example:" & return & return & "Some reader options:" & return & "--parse-raw --smart --old-dashes --base-header-level=NUMBER --indented-code-classes=CLASSES --default-image-extension=EXTENSION --metadata=KEY[:VAL] --normalize --preserve-tabs --tab-stop=NUMBER --track-changes=accept|reject|all --extract-media=DIR" & return & return & "Some writer options:" & return & "--data-dir=DIRECTORY --standalone --no-wrap --columns=NUMBER --toc --toc-depth=NUMBER --no-highlight --highlight-style=STYLE" & return & return & "Some options affecting specific writers:" & return & "--ascii --reference-links --chapters --number-sections --number-offset=NUMBER[,NUMBER,...] --no-tex-ligatures --listings --incremental --slide-level=NUMBER --section-divs --email-obfuscation=none|javascript|references --id-prefix=STRING --css=URL --latex-engine=pdflatex|lualatex|xelatex --latex-engine-opt=STRING --bibliography=FILE" buttons {"Cancel", "OK"} default button "OK" cancel button "Cancel" default answer "--standalone" with title "Pandoc: Specify other options"
+				set optionsDialogResult to display dialog "Input format: " & input_format & return & return & "Output format(s): " & output_format_list & return & return & "If you would like to add more command-line options, add them in the field below, for example:" & return & return & "Some reader options:" & return & "--parse-raw --smart --old-dashes --base-header-level=NUMBER --indented-code-classes=CLASSES --default-image-extension=EXTENSION --metadata=KEY[:VAL] --normalize --preserve-tabs --tab-stop=NUMBER --track-changes=accept|reject|all --extract-media=DIR" & return & return & "Some writer options:" & return & "--data-dir=DIRECTORY --standalone --no-wrap --columns=NUMBER --toc --toc-depth=NUMBER --no-highlight --highlight-style=STYLE" & return & return & "Some options affecting specific writers:" & return & "--ascii --reference-links --number-sections --number-offset=NUMBER[,NUMBER,...] --no-tex-ligatures --listings --incremental --slide-level=NUMBER --section-divs --email-obfuscation=none|javascript|references --id-prefix=STRING --css=URL --latex-engine=pdflatex|lualatex|xelatex --latex-engine-opt=STRING --bibliography=FILE --filter pandoc-citeproc|--natbib|--biblatex" buttons {"Cancel", "OK"} default button "OK" cancel button "Cancel" default answer "--standalone" with title "Pandoc: Specify other options"
 				-- Exit if cancel
 				if button returned of optionsDialogResult is "OK" then
 					set more_options to text returned of optionsDialogResult
@@ -73,47 +73,48 @@ on open dropped_files
 				-- Set the filename extension for each output format.
 				repeat with o from 1 to the count of output_format_words
 					set output_format to item o of output_format_words
-					if output_format is "native" then
-						set output_extension to ".hs"
-					end if
-					if output_format is "haddock" then
-						set output_extension to "-haddock.hs"
-					end if
-					if output_format is "json" then
-						set output_extension to ".json"
-					end if
-					if output_format is "plain" then
-						set output_extension to ".txt"
-					end if
-					if output_format is "mediawiki" then
-						set output_extension to "-mediawiki.txt"
-					end if
-					if output_format is "dokuwiki" then
-						set output_extension to "-dokuwiki.txt"
-					end if
+					-- Some output file extensions include hyphenated prefixes because if the user selects multiple formats with the same extension we want to differentiate each format.
 					if output_format is "asciidoc" then
 						set output_extension to "-asciidoc.txt"
 					end if
-					if output_format is "markdown" then
-						set output_extension to ".md"
-					end if
-					if output_format is "markdown_strict" then
-						set output_extension to "-strict.md"
-					end if
-					if output_format is "markdown_phpextra" then
-						set output_extension to "-phpextra.md"
-					end if
-					if output_format is "markdown_github" then
-						set output_extension to "-github.md"
-					end if
-					if output_format is "markdown_mmd" then
-						set output_extension to "-mmd.md"
+					if output_format is "beamer" then
+						set output_extension to "-beamer.tex"
 					end if
 					if output_format is "commonmark" then
 						set output_extension to "-commonmark.md"
 					end if
-					if output_format is "rst" then
-						set output_extension to ".rst"
+					if output_format is "context" then
+						set output_extension to "-context.tex"
+					end if
+					if output_format is "docbook4" then
+						set output_extension to "-docbook4.xml"
+					end if
+					if output_format is "docbook5" then
+						set output_extension to "-docbook5.xml"
+					end if
+					if output_format is "docx" then
+						set output_extension to ".docx"
+					end if
+					if output_format is "dokuwiki" then
+						set output_extension to "-dokuwiki.txt"
+					end if
+					if output_format is "dzslides" then
+						set output_extension to "-dzslides.html"
+					end if
+					if output_format is "epub2" then
+						set output_extension to "-epub2.epub"
+					end if
+					if output_format is "epub3" then
+						set output_extension to ".epub"
+					end if
+					if output_format is "fb2" then
+						set output_extension to ".fb2"
+					end if
+					if output_format is "gfm" then
+						set output_extension to "-gfm.md"
+					end if
+					if output_format is "haddock" then
+						set output_extension to "-haddock.hs"
 					end if
 					if output_format is "html" then
 						set output_extension to ".html"
@@ -121,77 +122,98 @@ on open dropped_files
 					if output_format is "html5" then
 						set output_extension to "-html5.html"
 					end if
-					if output_format is "slidy" then
-						set output_extension to "-slidy.html"
+					if output_format is "icml" then
+						set output_extension to ".icml"
 					end if
-					if output_format is "slideous" then
-						set output_extension to "-slideous.html"
-					end if
-					if output_format is "dzslides" then
-						set output_extension to "-dzslides.html"
-					end if
-					if output_format is "revealjs" then
-						set output_extension to "-revealjs.html"
-					end if
-					if output_format is "s5" then
-						set output_extension to "-s5.html"
+					if output_format is "json" then
+						set output_extension to ".json"
 					end if
 					if output_format is "latex" then
 						set output_extension to ".tex"
 					end if
-					if output_format is "beamer" then
-						set output_extension to "-beamer.tex"
-					end if
-					if output_format is "context" then
-						set output_extension to "-context.tex"
-					end if
-					if output_format is "rst" then
-						set output_extension to ".rst"
-					end if
 					if output_format is "man" then
 						set output_extension to ".man"
 					end if
-					if output_format is "textile" then
-						set output_extension to ".textile"
+					if output_format is "markdown" then
+						set output_extension to ".md"
 					end if
-					if output_format is "org" then
-						set output_extension to ".org"
+					if output_format is "markdown_github" then
+						set output_extension to "-github.md"
 					end if
-					if output_format is "texinfo" then
-						set output_extension to ".texi"
+					if output_format is "markdown_mmd" then
+						set output_extension to "-mmd.md"
 					end if
-					if output_format is "opml" then
-						set output_extension to ".opml"
+					if output_format is "markdown_phpextra" then
+						set output_extension to "-phpextra.md"
 					end if
-					if output_format is "docbook" then
-						set output_extension to ".db"
+					if output_format is "markdown_strict" then
+						set output_extension to "-strict.md"
 					end if
-					if output_format is "opendocument" then
-						set output_extension to ".xml"
+					if output_format is "mediawiki" then
+						set output_extension to "-mediawiki.txt"
+					end if
+					if output_format is "ms" then
+						set output_extension to ".ms"
+					end if
+					if output_format is "muse" then
+						set output_extension to ".muse"
+					end if
+					if output_format is "native" then
+						set output_extension to ".hs"
 					end if
 					if output_format is "odt" then
 						set output_extension to ".odt"
 					end if
-					if output_format is "docx" then
-						set output_extension to ".docx"
+					if output_format is "opendocument" then
+						set output_extension to ".xml"
+					end if
+					if output_format is "opml" then
+						set output_extension to ".opml"
+					end if
+					if output_format is "org" then
+						set output_extension to ".org"
+					end if
+					if output_format is "plain" then
+						set output_extension to ".txt"
+					end if
+					if output_format is "pptx" then
+						set output_extension to ".pptx"
+					end if
+					if output_format is "revealjs" then
+						set output_extension to "-revealjs.html"
+					end if
+					if output_format is "rst" then
+						set output_extension to ".rst"
 					end if
 					if output_format is "rtf" then
 						set output_extension to ".rtf"
 					end if
-					if output_format is "epub" then
-						set output_extension to ".epub"
+					if output_format is "s5" then
+						set output_extension to "-s5.html"
 					end if
-					if output_format is "epub3" then
-						set output_extension to "-epub3.epub"
+					if output_format is "slideous" then
+						set output_extension to "-slideous.html"
 					end if
-					if output_format is "fb2" then
-						set output_extension to ".fb2"
+					if output_format is "slidy" then
+						set output_extension to "-slidy.html"
 					end if
-					if output_format is "icml" then
-						set output_extension to ".icml"
+					if output_format is "tei" then
+						set output_extension to "-tei.xml"
+					end if
+					if output_format is "texinfo" then
+						set output_extension to ".texi"
+					end if
+					if output_format is "textile" then
+						set output_extension to ".textile"
+					end if
+					if output_format is "xwiki" then
+						set output_extension to "-xwiki.txt"
+					end if
+					if output_format is "zimwiki" then
+						set output_extension to "-zimwiki.txt"
 					end if
 					-- Run pandoc for each output format.
-					set shell_script to pandoc_path & " -f " & input_format & " -t " & output_format & space & more_options & " -o " & "'" & file_container & "/" & file_short_name & "-output" & output_extension & "'" & space & quoted form of file_path
+					set shell_script to "export PATH=" & pandoc_path & ":$PATH ; " & pandoc_path & "/pandoc" & " -f " & input_format & " -t " & output_format & space & more_options & " -o " & "'" & file_container & "/" & file_short_name & "-output" & output_extension & "'" & space & quoted form of file_path
 					do shell script shell_script
 				end repeat
 			end if

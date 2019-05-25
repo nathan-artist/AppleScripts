@@ -5,7 +5,7 @@ AppleScripts for use with OS X / macOS (tested in 10.9 Mavericks)
 This script, when saved as an application, creates a URI scheme ("spotlight:") that can be used to do a Spotlight search in the Finder from a URL (link) in any macOS application. Further instructions are in the script. Read the comments in the script before running it.
 
 ## AppleScript droplet for pandoc file conversion
-This script provides a graphical front end for [Pandoc](https://pandoc.org). Just [save it as an AppleScript droplet](https://developer.apple.com/library/content/documentation/LanguagesUtilities/Conceptual/MacAutomationScriptingGuide/SaveaScript.html), and then drop files onto it that you want to convert. Read the comments in the script before running it.
+This script provides a graphical front end for [Pandoc](https://pandoc.org). It is an especially easy way to convert to multiple file formats at once, since output formats are chosen from a list. Just [save it as an AppleScript droplet](https://developer.apple.com/library/content/documentation/LanguagesUtilities/Conceptual/MacAutomationScriptingGuide/SaveaScript.html), and then drop files onto it that you want to convert. Read the comments in the script before running it.
 
 ## AppleScript droplet to create symbolic link
 This script asks for a destination folder and creates symbolic links in that folder to whatever you drop onto it. Just [save it as an AppleScript droplet](https://developer.apple.com/library/content/documentation/LanguagesUtilities/Conceptual/MacAutomationScriptingGuide/SaveaScript.html), and then drop files or folders onto it that you want to link. The script ignores .webloc files since AppleScript treats those as URLs instead of as files.
