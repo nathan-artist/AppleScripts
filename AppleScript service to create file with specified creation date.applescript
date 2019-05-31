@@ -78,20 +78,26 @@ on run
 				set date_parsed to (date_parsed & (text 14 thru 15 of date_unparsed)) -- mm
 				set date_parsed to (date_parsed & "." & (text 17 thru 18 of date_unparsed)) -- ss
 			end if
-			set output_file_path to (save_path & date_parsed & ".html")
-			set shell_script to "touch -t " & date_parsed & space & quoted form of output_file_path & " ; setFile -a E " & quoted form of output_file_path & " ; Rez " & quoted form of resource_fork_path & " -a -o " & quoted form of output_file_path & " ; open -e " & quoted form of output_file_path
-			-- create a new empty file, hide its file extension, set the file to open always with TextEdit, and then open the file in TextEdit
+			set file_name to (date_parsed & ".html")
+			set output_file_path to (save_path & file_name)
+			set shell_script to "touch -t " & date_parsed & space & quoted form of output_file_path & " ; setFile -a E " & quoted form of output_file_path & " ; Rez " & quoted form of resource_fork_path & " -a -o " & quoted form of output_file_path & " ; open -e " & quoted form of output_file_path -- create a new empty file, hide its file extension, set the file to open always with TextEdit, and then open the file in TextEdit
 			do shell script shell_script
-			-- insert input date into the file
 			repeat until application "TextEdit" is running
+				-- wait until TextEdit is running
 				delay 0.2
 			end repeat
 			tell application "TextEdit"
-				repeat until document (date_parsed as string) exists
+				repeat until (document (date_parsed as string) exists) or (document (file_name as string) exists)
+					-- wait until the document is open
 					delay 0.2
 				end repeat
-				tell document (date_parsed as string) to set its text to date_original as string
-				set font of text of document (date_parsed as string) to "Arial"
+				if (document (date_parsed as string) exists) then
+					set window_name to date_parsed
+				else if (document (file_name as string) exists) then
+					set window_name to file_name
+				end if
+				tell document (window_name as string) to set its text to date_original as string -- insert input date into the file
+				set font of text of document (window_name as string) to "Arial"
 				activate
 			end tell
 			tell application "System Events" to tell process "TextEdit" -- workaround for strange font behavior in TextEdit: without this code, the font at the insertion point is TextEdit's default font
