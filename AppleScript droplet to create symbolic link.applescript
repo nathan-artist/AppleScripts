@@ -15,8 +15,8 @@ on open dragged_items
 		tell application "System Events"
 			activate
 			choose folder with prompt "Where to make the symbolic link(s)?"
+			set target_folder to the POSIX path of the result
 		end tell
-		set target_folder to the POSIX path of the result
 		repeat with this_item in dragged_items
 			set item_info to info for this_item
 			set type_identifier to type identifier of (item_info & {type identifier:"unknown"}) -- if there's no type identifier field in item_info then use "unknown"
