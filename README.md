@@ -7,6 +7,9 @@ This script, when saved as an application, creates a URI scheme ("spotlight:") t
 ## AppleScript droplet for pandoc file conversion
 This script provides a graphical front end for [Pandoc](https://pandoc.org). It is an especially easy way to convert to multiple file formats at once, since output formats are chosen from a list. Just [save it as an AppleScript droplet](https://developer.apple.com/library/content/documentation/LanguagesUtilities/Conceptual/MacAutomationScriptingGuide/SaveaScript.html), and then drop files onto it that you want to convert. Read the comments in the script before running it.
 
+## AppleScript droplet to copy rich-text hyperlinks to clipboard
+This script copies rich text to the clipboard containing a (list of) hyperlink(s) to any file(s) that you drop onto the droplet, with the file URL as the destination of the link, with the filename as the link text, and with the creation date of the file in parentheses following the link. Just [save it as an AppleScript droplet](https://developer.apple.com/library/content/documentation/LanguagesUtilities/Conceptual/MacAutomationScriptingGuide/SaveaScript.html), and then drop a file or files onto it that you want to link. Then you can paste the result into any rich text editor such as TextEdit.
+
 ## AppleScript droplet to create symbolic link
 This script asks for a destination folder and creates symbolic links in that folder to whatever you drop onto it. Just [save it as an AppleScript droplet](https://developer.apple.com/library/content/documentation/LanguagesUtilities/Conceptual/MacAutomationScriptingGuide/SaveaScript.html), and then drop files or folders onto it that you want to link. The script ignores .webloc files since AppleScript treats those as URLs instead of as files.
 
