@@ -1,6 +1,6 @@
 property script_title : "AppleScript droplet for pandoc file conversion"
-property script_version : "2.0"
-property pandoc_version : "2.7.2"
+property script_version : "3.0"
+property pandoc_version : "2.10.1"
 
 (*
 DISCLAIMER
@@ -14,7 +14,7 @@ IMPORTANT REQUIREMENTS
 Before trying to convert files, make sure that all input files are the same format, such as all markdown files or all html files. This script is designed to convert files of the same format. The script does not check the format of the input files, so it relies on you to accurately specify the format. The droplet only accepts files, not folders; folders are ignored.
 Make sure that the character encoding of all input files is UTF-8. If you're not sure of the character encoding, in Terminal.app you can check the character encoding of a file by entering the command: file -I [filename]
 Make sure that all input files have filename extensions (for example: .html, .rtf). It is OK if the extensions are hidden in the Finder; just make sure that each file has a filename extension, hidden or not. Make sure that there are no periods (except for the period before the extension) in the filenames of the input files. Make sure that there are no quotation marks (or other forbidden characters that would make the shell script fail) in the filenames.
-This script was written for pandoc 1.15.1, so if you are using a newer or older version of pandoc you will want to change the list of input formats and output formats in the script to reflect the formats supported by your version of pandoc, and you will want to make sure that the syntax after "do shell script" is correct for your version of pandoc.
+This script was written for pandoc 2.10.1, so if you are using a newer or older version of pandoc you will want to change the list of input formats and output formats in the script to reflect the formats supported by your version of pandoc, and you will want to make sure that the syntax after "do shell script" is correct for your version of pandoc.
 Before running the script you must install pandoc either directly from http://pandoc.org or using a package manager such as Fink, Homebrew, or MacPorts.
 Before running the script, change the property pandoc_path below to reflect the path of the pandoc command on your computer. In Terminal.app you can check the path of the pandoc command by entering the command: type -a pandoc
 *)
@@ -32,13 +32,13 @@ on open dropped_files
 	set userCanceled to true
 	try
 		-- Display a dialog box with a list of input formats and specify one. You can change the default item if you prefer a different one.
-		set inputFormats to {"commonmark", "creole", "docbook", "docuwiki", "docx", "epub", "fb2", "gfm", "haddock", "html", "ipynb", "jats", "json", "latex", "man", "markdown", "markdown_github", "markdown_mmd", "markdown_phpextra", "markdown_strict", "mediawiki", "muse", "native", "odt", "opml", "org", "rst", "t2t", "textile", "tikiwiki", "twiki", "vimwiki"}
+		set inputFormats to {"commonmark", "commonmark_x", "creole", "csv", "docbook", "docx", "dokuwiki", "epub", "fb2", "gfm", "haddock", "html", "ipynb", "jats", "jira", "json", "latex", "man", "markdown", "markdown_github", "markdown_mmd", "markdown_phpextra", "markdown_strict", "mediawiki", "muse", "native", "odt", "opml", "org", "rst", "t2t", "textile", "tikiwiki", "twiki", "vimwiki"}
 		set inputDialogResult to {choose from list inputFormats with title "Pandoc: Specify input format" with prompt "What is the format of the file(s) to be converted? (Note that markdown_github is deprecated in favor of gfm for GitHub-Flavored Markdown.)" default items "html"}
 		set input_format to inputDialogResult as string
 		-- Exit if cancel
 		if input_format is in inputFormats then
 			-- Display a dialog box with a list of output formats and specify one or more. You can change the default item if you prefer a different one.
-			set outputFormats to {"asciidoc", "beamer", "commonmark", "context", "docbook4", "docbook5", "docx", "dokuwiki", "dzslides", "epub2", "epub3", "fb2", "gfm", "haddock", "html", "html5", "icml", "json", "latex", "man", "markdown", "markdown_github", "markdown_mmd", "markdown_phpextra", "markdown_strict", "mediawiki", "ms", "muse", "native", "odt", "opendocument", "opml", "org", "plain", "pptx", "revealjs", "rst", "rtf", "s5", "slideous", "slidy", "tei", "texinfo", "textile", "xwiki", "zimwiki"}
+			set outputFormats to {"asciidoc", "beamer", "commonmark", "commonmark_x", "context", "docbook4", "docbook5", "docx", "dokuwiki", "dzslides", "epub2", "epub3", "fb2", "gfm", "haddock", "html4", "html5", "icml", "ipynb", "jats_archiving", "jats_articleauthoring", "jats_publishing", "jira", "json", "latex", "man", "markdown", "markdown_github", "markdown_mmd", "markdown_phpextra", "markdown_strict", "mediawiki", "ms", "muse", "native", "odt", "opendocument", "opml", "org", "plain", "pptx", "revealjs", "rst", "rtf", "s5", "slideous", "slidy", "tei", "texinfo", "textile", "xwiki", "zimwiki"}
 			set outputDialogResult to {choose from list outputFormats with title "Pandoc: Specify output format(s)" with prompt "Input format is " & input_format & ". What output format(s) do you want? (Note that markdown_github is deprecated in favor of gfm for GitHub-Flavored Markdown.)" default items "docx" with multiple selections allowed}
 			set {text_delimiters, my text item delimiters} to {my text item delimiters, space}
 			set output_format_words to words of (outputDialogResult as text)
@@ -83,6 +83,9 @@ on open dropped_files
 					if output_format is "commonmark" then
 						set output_extension to "-commonmark.md"
 					end if
+					if output_format is "commonmark_x" then
+						set output_extension to "-commonmark_x.md"
+					end if
 					if output_format is "context" then
 						set output_extension to "-context.tex"
 					end if
@@ -116,14 +119,26 @@ on open dropped_files
 					if output_format is "haddock" then
 						set output_extension to "-haddock.hs"
 					end if
-					if output_format is "html" then
-						set output_extension to ".html"
+					if output_format is "html4" then
+						set output_extension to "-html4.html"
 					end if
 					if output_format is "html5" then
-						set output_extension to "-html5.html"
+						set output_extension to ".html"
 					end if
 					if output_format is "icml" then
 						set output_extension to ".icml"
+					end if
+					if output_format is "jats_archiving" then
+						set output_extension to "-jats_archiving.xml"
+					end if
+					if output_format is "jats_articleauthoring" then
+						set output_extension to "-jats_articleauthoring.xml"
+					end if
+					if output_format is "jats_publishing" then
+						set output_extension to "-jats_publishing.xml"
+					end if
+					if output_format is "jira" then
+						set output_extension to "-jira.txt"
 					end if
 					if output_format is "json" then
 						set output_extension to ".json"
