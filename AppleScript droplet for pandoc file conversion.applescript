@@ -30,6 +30,7 @@ end run
 on open dropped_files
 	set userCanceled to true
 	try
+		activate
 		-- Display a dialog box with a list of input formats and specify one. You can change the default item if you prefer a different one.
 		set inputFormats to {"bibtex", "biblatex", "commonmark", "commonmark_x", "creole", "csljson", "csv", "docbook", "docx", "dokuwiki", "epub", "fb2", "gfm", "haddock", "html", "ipynb", "jats", "jira", "json", "latex", "man", "markdown", "markdown_github", "markdown_mmd", "markdown_phpextra", "markdown_strict", "mediawiki", "muse", "native", "odt", "opml", "org", "rst", "rtf", "t2t", "textile", "tikiwiki", "twiki", "vimwiki"}
 		set inputDialogResult to {choose from list inputFormats with title "Pandoc: Specify input format" with prompt "What is the format of the file(s) to be converted? (Note that markdown_github is deprecated in favor of gfm for GitHub-Flavored Markdown.)" default items "html"}
