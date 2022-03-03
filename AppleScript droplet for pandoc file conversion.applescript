@@ -39,7 +39,7 @@ on open dropped_files
 		if input_format is in inputFormats then
 			-- Display a dialog box with a list of output formats and specify one or more. You can change the default item if you prefer a different one.
 			set outputFormats to {"asciidoc", "beamer", "bibtex", "biblatex", "commonmark", "commonmark_x", "context", "csljson", "docbook4", "docbook5", "docx", "dokuwiki", "dzslides", "epub2", "epub3", "fb2", "gfm", "haddock", "html4", "html5", "icml", "ipynb", "jats_archiving", "jats_articleauthoring", "jats_publishing", "jira", "json", "latex", "man", "markdown", "markdown_github", "markdown_mmd", "markdown_phpextra", "markdown_strict", "mediawiki", "ms", "muse", "native", "odt", "opendocument", "opml", "org", "plain", "pdf", "pptx", "revealjs", "rst", "rtf", "s5", "slideous", "slidy", "tei", "texinfo", "textile", "xwiki", "zimwiki"}
-			set outputDialogResult to {choose from list outputFormats with title "Pandoc: Specify output format(s)" with prompt "Input format is " & input_format & ". What output format(s) do you want? (Note that markdown_github is deprecated in favor of gfm for GitHub-Flavored Markdown.)" default items "docx" with multiple selections allowed}
+			set outputDialogResult to {choose from list outputFormats with title "Pandoc: Specify output format(s)" with prompt "Input format is " & input_format & ". What output format(s) do you want? (Note that markdown_github is deprecated in favor of gfm for GitHub-Flavored Markdown.)" default items "html5" with multiple selections allowed}
 			set text item delimiters to space
 			set output_format_words to words of (outputDialogResult as text)
 			-- Exit if cancel
