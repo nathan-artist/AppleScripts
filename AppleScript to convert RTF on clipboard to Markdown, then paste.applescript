@@ -1,9 +1,9 @@
 -- This script takes rich text from the clipboard in Rich Text Format (RTF), converts the text to Markdown using Apple's Cocoa text system and Pandoc, and then pastes the Markdown-formatted plain text into the active field or window. The script informs the user if what's on the clipboard is not RTF. Pandoc must be installed first from https://pandoc.org
 
 on run
-	set clipboard_is_rtf to true
 	try
-		the clipboard as "RTF "
+		(item 1 of (clipboard info for Çclass RTF È))
+		set clipboard_is_rtf to true
 	on error
 		set clipboard_is_rtf to false
 		beep
