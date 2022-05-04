@@ -1,6 +1,6 @@
 property script_title : "AppleScript droplet for pandoc file conversion"
-property script_version : "3.2"
-property pandoc_version : "2.16"
+property script_version : "3.3"
+property pandoc_version : "2.18"
 
 (*
 DISCLAIMER
@@ -32,13 +32,13 @@ on open dropped_files
 	try
 		activate
 		-- Display a dialog box with a list of input formats and specify one. You can change the default item if you prefer a different one.
-		set inputFormats to {"bibtex", "biblatex", "commonmark", "commonmark_x", "creole", "csljson", "csv", "docbook", "docx", "dokuwiki", "epub", "fb2", "gfm", "haddock", "html", "ipynb", "jats", "jira", "json", "latex", "man", "markdown", "markdown_github", "markdown_mmd", "markdown_phpextra", "markdown_strict", "mediawiki", "muse", "native", "odt", "opml", "org", "rst", "rtf", "t2t", "textile", "tikiwiki", "twiki", "vimwiki"}
+		set inputFormats to {"bibtex", "biblatex", "commonmark", "commonmark_x", "creole", "csljson", "csv", "docbook", "docx", "dokuwiki", "endnotexml", "epub", "fb2", "gfm", "haddock", "html", "ipynb", "jats", "jira", "json", "latex", "man", "markdown", "markdown_github", "markdown_mmd", "markdown_phpextra", "markdown_strict", "mediawiki", "muse", "native", "odt", "opml", "org", "ris", "rst", "rtf", "t2t", "textile", "tikiwiki", "twiki", "vimwiki"}
 		set inputDialogResult to {choose from list inputFormats with title "Pandoc: Specify input format" with prompt "What is the format of the file(s) to be converted? (Note that markdown_github is deprecated in favor of gfm for GitHub-Flavored Markdown.)" default items "html"}
 		set input_format to inputDialogResult as string
 		-- Exit if cancel
 		if input_format is in inputFormats then
 			-- Display a dialog box with a list of output formats and specify one or more. You can change the default item if you prefer a different one.
-			set outputFormats to {"asciidoc", "beamer", "bibtex", "biblatex", "commonmark", "commonmark_x", "context", "csljson", "docbook4", "docbook5", "docx", "dokuwiki", "dzslides", "epub2", "epub3", "fb2", "gfm", "haddock", "html4", "html5", "icml", "ipynb", "jats_archiving", "jats_articleauthoring", "jats_publishing", "jira", "json", "latex", "man", "markdown", "markdown_github", "markdown_mmd", "markdown_phpextra", "markdown_strict", "mediawiki", "ms", "muse", "native", "odt", "opendocument", "opml", "org", "plain", "pdf", "pptx", "revealjs", "rst", "rtf", "s5", "slideous", "slidy", "tei", "texinfo", "textile", "xwiki", "zimwiki"}
+			set outputFormats to {"asciidoc", "beamer", "bibtex", "biblatex", "commonmark", "commonmark_x", "context", "csljson", "docbook4", "docbook5", "docx", "dokuwiki", "dzslides", "epub2", "epub3", "fb2", "gfm", "haddock", "html4", "html5", "icml", "ipynb", "jats_archiving", "jats_articleauthoring", "jats_publishing", "jira", "json", "latex", "man", "markdown", "markdown_github", "markdown_mmd", "markdown_phpextra", "markdown_strict", "markua", "mediawiki", "ms", "muse", "native", "odt", "opendocument", "opml", "org", "plain", "pdf", "pptx", "revealjs", "rst", "rtf", "s5", "slideous", "slidy", "tei", "texinfo", "textile", "xwiki", "zimwiki"}
 			set outputDialogResult to {choose from list outputFormats with title "Pandoc: Specify output format(s)" with prompt "Input format is " & input_format & ". What output format(s) do you want? (Note that markdown_github is deprecated in favor of gfm for GitHub-Flavored Markdown.)" default items "html5" with multiple selections allowed}
 			set text item delimiters to space
 			set output_format_words to words of (outputDialogResult as text)
@@ -170,6 +170,9 @@ on open dropped_files
 					end if
 					if output_format is "markdown_strict" then
 						set output_extension to "-strict.md"
+					end if
+					if output_format is "markua" then
+						set output_extension to "-markua.md"
 					end if
 					if output_format is "mediawiki" then
 						set output_extension to "-mediawiki.txt"
