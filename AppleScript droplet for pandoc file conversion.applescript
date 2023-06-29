@@ -1,6 +1,6 @@
 property script_title : "AppleScript droplet for pandoc file conversion"
 property script_version : "3.4"
-property pandoc_version : "3.14"
+property pandoc_version : "3.1.4"
 
 (*
 DISCLAIMER
@@ -37,21 +37,27 @@ on open dropped_files
 		set input_format to inputDialogResult as string
 		-- Exit if cancel
 		if input_format is in inputFormats then
-			-- Display a dialog box with a list of output formats and specify one or more. You can change the default item if you prefer a different one.
-			set outputFormats to {"asciidoc", "beamer", "bibtex", "biblatex", "chunkedhtml", "commonmark", "commonmark_x", "context", "csljson", "docbook4", "docbook5", "docx", "dokuwiki", "dzslides", "epub2", "epub3", "fb2", "gfm", "haddock", "html4", "html5", "icml", "ipynb", "jats_archiving", "jats_articleauthoring", "jats_publishing", "jira", "json", "latex", "man", "markdown", "markdown_github", "markdown_mmd", "markdown_phpextra", "markdown_strict", "markua", "mediawiki", "ms", "muse", "native", "odt", "opendocument", "opml", "org", "plain", "pdf", "pptx", "revealjs", "rst", "rtf", "s5", "slideous", "slidy", "tei", "texinfo", "textile", "typst", "xwiki", "zimwiki"}
-			set outputDialogResult to {choose from list outputFormats with title "Pandoc: Specify output format(s)" with prompt "Input format is " & input_format & ". What output format(s) do you want? (Note that markdown_github is deprecated in favor of gfm for GitHub-Flavored Markdown.)" default items "html5" with multiple selections allowed}
-			set text item delimiters to space
-			set output_format_words to words of (outputDialogResult as text)
+			-- Display a dialog box to specify input extensions via a text field.
+			set inputExtensionsDialogResult to display dialog "Input format: " & input_format & return & return & "If you would like enable or disable extensions for the input format, specify them carefully (no spaces!) in the field below in format +EXTENSION[-EXTENSION]. For example, +smart  will toggle smart typography (the exact effect depends on the format), while -smart+wikilinks_title_after_pipe will toggle smart typography the opposite way and add wikilink support (if format is markdown). Leave the field empty for no extensions." buttons {"Cancel", "OK"} default button "OK" cancel button "Cancel" default answer "" with title "Pandoc: Specify input extensions"
 			-- Exit if cancel
-			if (first item of output_format_words) is in outputFormats then
-				set text item delimiters to ", "
-				set output_format_list to outputDialogResult as text
-				-- Display a dialog box with specified input and output formats, so you can cancel if you made any mistakes and specify more command-line options via a text field. You can change the default answer if you prefer a different one.
-				set optionsDialogResult to display dialog "Input format: " & input_format & return & return & "Output format(s): " & output_format_list & return & return & "If you would like to add more command-line options, add them carefully in the field below, for example:" & return & return & "Some reader options:" & return & "--indented-code-classes=CLASSES --default-image-extension=EXTENSION --metadata=KEY[:VAL] --preserve-tabs --tab-stop=NUMBER --track-changes=accept|reject|all --extract-media=DIR --shift-heading-level-by=X, where X=NUMBER-1" & return & return & "Some writer options:" & return & "--data-dir=DIRECTORY --defaults=FILE --standalone --wrap=auto|none|preserve --columns=NUMBER --toc (requires --standalone) --toc-depth=NUMBER --no-highlight --highlight-style=STYLE --resource-path=SEARCHPATH --template=FILE|URL --variable=KEY[:VAL]" & return & return & "Some options affecting specific writers:" & return & "--ascii -atx-headers --reference-links --reference-location=block|section|document --number-sections --number-offset=NUMBER[,NUMBER,...] --top-level-division=default|section|chapter|part --listings --incremental --slide-level=NUMBER --section-divs --email-obfuscation=none|javascript|references --id-prefix=STRING --css=URL --reference-doc=FILE --epub-cover-image=FILE --epub-metadata=FILE --epub-embed-font=FILE --epub-chapter-level=NUMBER --pdf-engine=pdflatex|lualatex|xelatex --pdf-engine-opt=STRING --bibliography=FILE --citeproc|--natbib|--biblatex --csl=FILE" buttons {"Cancel", "OK"} default button "OK" cancel button "Cancel" default answer "--standalone" with title "Pandoc: Specify other options"
+			if button returned of inputExtensionsDialogResult is "OK" then
+				set input_extensions to text returned of inputExtensionsDialogResult
+				-- Display a dialog box with a list of output formats and specify one or more. You can change the default item if you prefer a different one.
+				set outputFormats to {"asciidoc", "beamer", "bibtex", "biblatex", "chunkedhtml", "commonmark", "commonmark_x", "context", "csljson", "docbook4", "docbook5", "docx", "dokuwiki", "dzslides", "epub2", "epub3", "fb2", "gfm", "haddock", "html4", "html5", "icml", "ipynb", "jats_archiving", "jats_articleauthoring", "jats_publishing", "jira", "json", "latex", "man", "markdown", "markdown_github", "markdown_mmd", "markdown_phpextra", "markdown_strict", "markua", "mediawiki", "ms", "muse", "native", "odt", "opendocument", "opml", "org", "plain", "pdf", "pptx", "revealjs", "rst", "rtf", "s5", "slideous", "slidy", "tei", "texinfo", "textile", "typst", "xwiki", "zimwiki"}
+				set outputDialogResult to {choose from list outputFormats with title "Pandoc: Specify output format(s)" with prompt "Input format is " & input_format & ". What output format(s) do you want? (Note that markdown_github is deprecated in favor of gfm for GitHub-Flavored Markdown.)" default items "html5" with multiple selections allowed}
+				set text item delimiters to space
+				set output_format_words to words of (outputDialogResult as text)
 				-- Exit if cancel
-				if button returned of optionsDialogResult is "OK" then
-					set more_options to text returned of optionsDialogResult
-					set userCanceled to false
+				if (first item of output_format_words) is in outputFormats then
+					set text item delimiters to ", "
+					set output_format_list to outputDialogResult as text
+					-- Display a dialog box with specified input and output formats, so you can cancel if you made any mistakes and specify more command-line options via a text field. You can change the default answer if you prefer a different one.
+					set optionsDialogResult to display dialog "Input format: " & input_format & return & return & "Output format(s): " & output_format_list & return & return & "If you would like to add more command-line options, add them carefully in the field below, for example:" & return & return & "Some reader options:" & return & "--indented-code-classes=CLASSES --default-image-extension=EXTENSION --metadata=KEY[:VAL] --preserve-tabs --tab-stop=NUMBER --track-changes=accept|reject|all --extract-media=DIR --shift-heading-level-by=X, where X=NUMBER-1" & return & return & "Some writer options:" & return & "--data-dir=DIRECTORY --defaults=FILE --standalone --wrap=auto|none|preserve --columns=NUMBER --toc (requires --standalone) --toc-depth=NUMBER --no-highlight --highlight-style=STYLE --resource-path=SEARCHPATH --template=FILE|URL --variable=KEY[:VAL]" & return & return & "Some options affecting specific writers:" & return & "--ascii -atx-headers --reference-links --reference-location=block|section|document --number-sections --number-offset=NUMBER[,NUMBER,...] --top-level-division=default|section|chapter|part --listings --incremental --slide-level=NUMBER --section-divs --email-obfuscation=none|javascript|references --id-prefix=STRING --css=URL --reference-doc=FILE --epub-cover-image=FILE --epub-metadata=FILE --epub-embed-font=FILE --epub-chapter-level=NUMBER --pdf-engine=pdflatex|lualatex|xelatex --pdf-engine-opt=STRING --bibliography=FILE --citeproc|--natbib|--biblatex --csl=FILE" buttons {"Cancel", "OK"} default button "OK" cancel button "Cancel" default answer "--standalone" with title "Pandoc: Specify other options"
+					-- Exit if cancel
+					if button returned of optionsDialogResult is "OK" then
+						set more_options to text returned of optionsDialogResult
+						set userCanceled to false
+					end if
 				end if
 			end if
 		end if
@@ -245,7 +251,7 @@ on open dropped_files
 					end if
 					set new_file_path to file_container & "/" & file_name & "-output" & output_extension
 					-- Run pandoc for each output format.
-					set shell_script to "export PATH=" & pandoc_path & ":$PATH ; cd " & quoted form of file_container & " ; " & pandoc_path & "/pandoc" & " -f " & input_format & " -t " & output_format & space & more_options & " -o " & quoted form of new_file_path & space & quoted form of file_path
+					set shell_script to "export PATH=" & pandoc_path & ":$PATH ; cd " & quoted form of file_container & " ; " & pandoc_path & "/pandoc" & " -f " & input_format & input_extensions & " -t " & output_format & space & more_options & " -o " & quoted form of new_file_path & space & quoted form of file_path
 					do shell script shell_script
 				end repeat
 			end if
